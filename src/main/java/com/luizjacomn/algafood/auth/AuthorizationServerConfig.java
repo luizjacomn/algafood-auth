@@ -11,6 +11,9 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
@@ -31,7 +34,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .secret(passwordEncoder.encode("123web"))
                 .authorizedGrantTypes("password", "refresh_token")
                 .scopes("write", "read")
-                .accessTokenValiditySeconds(10)
+                .accessTokenValiditySeconds((int) Duration.of(6, ChronoUnit.HOURS).getSeconds()) // padrão 12 horas
+                .refreshTokenValiditySeconds((int) Duration.of(60, ChronoUnit.DAYS).getSeconds()) // padrão 1 mês
             .and()
                 .withClient("algafood-mobile")
                 .secret(passwordEncoder.encode("123mobile"))
@@ -51,5 +55,6 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints.authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService);
+        //        .reuseRefreshTokens(false);
     }
 }
