@@ -37,10 +37,10 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .accessTokenValiditySeconds((int) Duration.of(6, ChronoUnit.HOURS).getSeconds()) // padrão 12 horas
                 .refreshTokenValiditySeconds((int) Duration.of(60, ChronoUnit.DAYS).getSeconds()) // padrão 1 mês
             .and()
-                .withClient("algafood-mobile")
-                .secret(passwordEncoder.encode("123mobile"))
-                .authorizedGrantTypes("password")
-                .scopes("write", "read")
+                .withClient("faturamento")
+                .secret(passwordEncoder.encode("123faturamento"))
+                .authorizedGrantTypes("client_credentials")
+                .scopes("read")
             .and()
                 .withClient("checktoken")
                 .secret(passwordEncoder.encode("123check"));
