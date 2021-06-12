@@ -46,7 +46,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .secret(passwordEncoder.encode("123food"))
                 .authorizedGrantTypes("authorization_code")
                 .scopes("write", "read")
-                .redirectUris("http://aplicacao-cliente")
+                .redirectUris("http://localhost:8082")
             .and()
                 .withClient("checktoken")
                 .secret(passwordEncoder.encode("123check"));
