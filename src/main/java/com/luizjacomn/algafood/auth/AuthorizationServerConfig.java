@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 
 @Configuration
 @EnableAuthorizationServer
@@ -26,11 +27,19 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .secret(passwordEncoder.encode("123web"))
                 .authorizedGrantTypes("password")
                 .scopes("write", "read")
-                .and()
+            .and()
                 .withClient("algafood-mobile")
                 .secret(passwordEncoder.encode("123mobile"))
                 .authorizedGrantTypes("password")
-                .scopes("write", "read");
+                .scopes("write", "read")
+            .and()
+                .withClient("checktoken")
+                .secret(passwordEncoder.encode("123check"));
+    }
+
+    @Override
+    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+        security.checkTokenAccess("isAuthenticated()");
     }
 
     @Override
