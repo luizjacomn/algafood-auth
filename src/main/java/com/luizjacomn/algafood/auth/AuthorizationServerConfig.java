@@ -10,9 +10,13 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.CompositeTokenGranter;
+import org.springframework.security.oauth2.provider.TokenGranter;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableAuthorizationServer
@@ -48,6 +52,12 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .scopes("write", "read")
                 .redirectUris("http://localhost:8082")
             .and()
+                .withClient("food-analytics-pkce")
+                .secret(passwordEncoder.encode(""))
+                .authorizedGrantTypes("authorization_code")
+                .scopes("write", "read")
+                .redirectUris("http://localhost:8082")
+            .and()
                 .withClient("web-admin")
                 .authorizedGrantTypes("implicit")
                 .scopes("write", "read")
@@ -59,13 +69,26 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-        security.checkTokenAccess("isAuthenticated()");
+        security.checkTokenAccess("isAuthenticated()")
+                .allowFormAuthenticationForClients();
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints.authenticationManager(authenticationManager)
-                .userDetailsService(userDetailsService);
+                .userDetailsService(userDetailsService)
         //        .reuseRefreshTokens(false);
+                .tokenGranter(tokenGranter(endpoints));
+    }
+
+    private TokenGranter tokenGranter(AuthorizationServerEndpointsConfigurer endpoints) {
+        PkceAuthorizationCodeTokenGranter pkceAuthorizationCodeTokenGranter = new PkceAuthorizationCodeTokenGranter(endpoints.getTokenServices(),
+                endpoints.getAuthorizationCodeServices(), endpoints.getClientDetailsService(),
+                endpoints.getOAuth2RequestFactory());
+
+        List<TokenGranter> granters = Arrays.asList(
+                pkceAuthorizationCodeTokenGranter, endpoints.getTokenGranter());
+
+        return new CompositeTokenGranter(granters);
     }
 }
